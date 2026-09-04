@@ -41,7 +41,7 @@ class RivenAPIError(RuntimeError):
             return (
                 "Invalid or missing API key (401).\n"
                 "  Run  rvn login  to store a key, or set RIVEN_API_KEY.\n"
-                "  Keys are minted at the console: https://platform.rivenai.io/console/keys"
+                "  Keys are minted at the console: https://rivenai.io/code/console/keys"
             )
         if self.status == 402:
             if code == "quota_exceeded":
@@ -56,7 +56,7 @@ class RivenAPIError(RuntimeError):
             if code == "ALLOTMENT_EXCEEDED":
                 return (
                     "Monthly Computer Mode action allotment exceeded (402).\n"
-                    "  Upgrade your plan: https://platform.rivenai.io/console/computer/plan\n"
+                    "  Upgrade your plan: https://rivenai.io/code/console/computer/plan\n"
                     f"  Or switch to pay-as-you-go: {PAYG_URL}"
                 )
             return (
