@@ -32,8 +32,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e . pyinstaller
-      - run: pyinstaller --onefile --name rvn --strip \
-          --hidden-import=rvn.commands --hidden-import=rvn.citations \
+      - run: >-
+          pyinstaller --onefile --name rvn --strip
+          --hidden-import=rvn.commands --hidden-import=rvn.citations
           --collect-submodules rvn src/rvn/__main__.py
       - run: ./dist/rvn --version && ./dist/rvn --help >/dev/null
       - uses: actions/upload-artifact@v4
@@ -49,8 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip3 install -e . pyinstaller
-      - run: pyinstaller --onefile --name rvn --strip \
-          --hidden-import=rvn.commands --hidden-import=rvn.citations \
+      - run: >-
+          pyinstaller --onefile --name rvn --strip
+          --hidden-import=rvn.commands --hidden-import=rvn.citations
           --collect-submodules rvn src/rvn/__main__.py
       - run: ./dist/rvn --version
       - uses: actions/upload-artifact@v4
