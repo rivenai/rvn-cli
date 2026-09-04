@@ -413,6 +413,7 @@ def pages(
     as_json: bool = False,
     tier: str = "research",
     web_base: str = "https://rivenai.io",
+    opener: Any = None,
 ) -> dict:
     """Generate a Riven Page (Pages v0.1 API).
 
