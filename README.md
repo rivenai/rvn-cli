@@ -1,0 +1,92 @@
+# rvn — the Riven CLI
+
+`rvn` is a single binary for grounded answers with citations, deep research,
+and Pages — everything the Riven gateway (OpenAI-compatible,
+`https://api.rivenai.io/v1`) exposes, in your terminal.
+
+Parity surface: `rvn chat`, `rvn models`, `rvn deep`, `rvn pages` — the Riven
+answer to the pplx CLI (shipped by Perplexity 2026-07-27).
+
+## Install
+
+One-liner (macOS + Linux, prebuilt single-file binary):
+
+```sh
+curl -fsSL https://dl.rivenai.io/rvn/install.sh | sh
+```
+
+Homebrew (tap stub — see `Formula/rvn.rb`):
+
+```sh
+brew install rivenai/rvn/rvn
+```
+
+pip (any OS):
+
+```sh
+pip install rvn-cli
+```
+
+## Login
+
+```sh
+rvn login
+```
+
+Mints via the console flow: open https://platform.rivenai.io/console/keys,
+create a key (they start with `rvn_`), paste it once — it's stored at
+`~/.rvn/key` (chmod 600, never printed). Or use `RIVEN_API_KEY` / `--key`.
+
+## Commands
+
+```sh
+# One-shot grounded ask — streams the answer, then [n] source lines
+rvn chat "who is the CEO of NVIDIA"
+
+# Interactive REPL (multi-turn, keeps history)
+rvn chat -i
+
+# Full model catalog from /v1/models
+rvn models
+
+# Deep research — dispatches a research task, streams progress, prints the report
+rvn deep "compare rust and zig for embedded systems"
+rvn deep --task <task-id>   # re-fetch a report
+
+# Generate a Riven Page (Pages v0.1 API)
+rvn pages "state of AI inference pricing 2026" --tier research
+
+# Machine-readable output for scripting
+rvn --json chat "population of tokyo" | jq -r '.citations[].url'
+```
+
+## Auth rules
+
+- Key resolution order: `--key` flag → `RIVEN_API_KEY` env → `~/.rvn/key`.
+- The key is **never printed** — not in output, not in errors, not in `--json`.
+- `401` → friendly "run rvn login" message. `402` (quota exhausted) →
+  top-up link (PAYG balance) with usage counts.
+
+## Build from source
+
+```sh
+pip install -e . pyinstaller
+pyinstaller --onefile --name rvn src/rvn/__main__.py
+./dist/rvn --version
+```
+
+CI (`.github/workflows/ci.yml`) builds linux x64 + macOS binaries and the pip
+wheel on every tag; artifacts land under the release with SHA256SUMS.
+
+## Design notes
+
+- Python, stdlib-only (urllib + json) — single-file PyInstaller binary, ~9MB.
+- Streaming SSE (`stream: true`) on chat; citations parsed from the grounded
+  models' `Sources:` block and re-rendered as `[n] title — url` lines.
+- `rvn deep` uses the gateway's async `/v1/tasks` orchestrator passthrough
+  (the same deep-research pipeline behind the Riven `/research` surface).
+- No admin flags, no self-approval paths, no secret values in output.
+
+## License
+
+MIT — © Riven 2026.

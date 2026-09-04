@@ -1,0 +1,97 @@
+# rvn CLI — build matrix: linux x64 + macos (universal2 via PyInstaller), pip wheel, tests.
+# Artifacts upload on every tag push. Self-hosted runners on the Riven box
+# ("riven" label) provide the macOS lane; GitHub-hosted ubuntu handles x64.
+name: rvn-ci
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Unit tests (pytest, mock transport)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . pytest
+      - run: python -m pytest tests/test_args.py tests/test_mock_transport.py
+
+  build-linux:
+    name: Linux x64 binary (PyInstaller)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . pyinstaller
+      - run: pyinstaller --onefile --name rvn --strip \
+          --hidden-import=rvn.commands --hidden-import=rvn.citations \
+          --collect-submodules rvn src/rvn/__main__.py
+      - run: ./dist/rvn --version && ./dist/rvn --help >/dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rvn-linux-x64
+          path: dist/rvn
+          if-no-files-found: error
+
+  build-macos:
+    name: macOS binary (PyInstaller, universal2)
+    runs-on: [self-hosted, macOS]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install -e . pyinstaller
+      - run: pyinstaller --onefile --name rvn --strip \
+          --hidden-import=rvn.commands --hidden-import=rvn.citations \
+          --collect-submodules rvn src/rvn/__main__.py
+      - run: ./dist/rvn --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rvn-macos
+          path: dist/rvn
+          if-no-files-found: error
+
+  build-wheel:
+    name: Pip wheel (rvn-cli)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - run: python -m build --wheel --sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rvn-wheel
+          path: dist/*.whl
+          if-no-files-found: error
+
+  release:
+    name: Stage release artifacts
+    needs: [test, build-linux, build-wheel]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: SHA256SUMS
+        run: |
+          cd artifacts
+          sha256sum rvn rvn-cli-*.whl > SHA256SUMS || true
+          cat SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rvn-release
+          path: artifacts/
+          if-no-files-found: error

@@ -1,0 +1,2 @@
+[console_scripts]
+rvn = rvn.cli:run
