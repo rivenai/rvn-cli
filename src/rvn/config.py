@@ -9,9 +9,9 @@ from pathlib import Path
 DEFAULT_BASE_URL = "https://api.rivenai.io/v1"
 KEY_DIR = Path.home() / ".rvn"
 KEY_FILE = KEY_DIR / "key"
-CONSOLE_URL = "https://rivenai.io/code/console/keys"
+CONSOLE_URL = "https://platform.rivenai.io/keys"
 TOPUP_URL = "https://rivenai.io/code/console/plan"
-PAYG_URL = "https://platform.rivenai.io/"  # honest interim page — PAYG landing shortly
+PAYG_URL = "https://platform.rivenai.io/keys"  # self-serve PAYG key minting is live
 
 VALID_PREFIXES = ("rvn_",)
 
