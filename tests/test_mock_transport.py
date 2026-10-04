@@ -152,7 +152,7 @@ def test_402_quota_upsell_message():
     assert "402" in msg
     assert "quota" in msg.lower()
     assert "top up" in msg.lower()
-    assert "chat.rivenai.io/settings/billing" in msg
+    assert "rivenai.io/code/console/plan" in msg
 
 
 def test_error_never_leaks_key():

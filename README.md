@@ -33,7 +33,7 @@ pip install rvn-cli
 rvn login
 ```
 
-Mints via the console flow: open https://platform.rivenai.io/console/keys,
+Mints via the console flow: open https://platform.rivenai.io/keys,
 create a key (they start with `rvn_`), paste it once — it's stored at
 `~/.rvn/key` (chmod 600, never printed). Or use `RIVEN_API_KEY` / `--key`.
 
